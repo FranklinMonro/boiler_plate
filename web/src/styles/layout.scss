@@ -1,0 +1,9 @@
+$topbar-height: 80px;
+$topbar-height-lt-md: 56px;
+
+// Angular Flex layout
+// https://github.com/angular/flex-layout/blob/master/docs/documentation/Responsive-API.md
+$xs: 37.5rem; // @media (min-width: 600px)
+$sm: 60rem; // @media (min-width: 960px)
+$md: 80rem; // @media (min-width: 1280px)
+$lg: 120rem; // @media (min-width: 1920px)

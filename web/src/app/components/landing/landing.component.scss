@@ -1,0 +1,33 @@
+.container {
+  max-height: 100vh;
+  min-height: 100vh;
+  background-color: #595ca9;
+  .landing-toolbar {
+    background-color: transparent;
+  }
+}
+
+.img-container {
+  text-align: center;
+  .landing-logo {
+    max-width: 50%;
+  }
+}
+
+.form-field {
+  width: 100%;
+}
+
+.div-spacer {
+  flex: 1 1 auto;
+}
+
+.search-button {
+  background-color: #bce132;
+}
+
+.landing-card-form {
+  max-width: 40vw;
+  margin-bottom: 8px;
+}
+

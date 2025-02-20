@@ -1,0 +1,64 @@
+<div class="container">
+  <mat-toolbar class="landing-toolbar">
+    <button mat-fab extended>
+      <mat-icon>person_add</mat-icon>
+        Sign Up
+    </button>
+    <span class="div-spacer"></span>
+    <button mat-fab extended>
+      <mat-icon>login</mat-icon>
+        Login
+    </button>
+  </mat-toolbar>
+  <div class="img-container">
+    <img src="assets/images/myGCLogo_default-white.svg" alt="myGC Logo" class="landing-logo" />
+  </div>
+  <mat-grid-list cols="2" rowHeight="2:1">
+    <mat-grid-tile>
+      <mat-card appearance="outlined" class="landing-card">
+        <mat-card-header>
+          <mat-card-title>Find and book a doctor near you,&nbsp;instantly!</mat-card-title>
+        </mat-card-header>
+        <mat-card-content>
+          <form (ngSubmit)="onSubmit()" [formGroup]="landingForm">
+            <mat-form-field appearance="fill" class="form-field">
+              <mat-label>Location</mat-label>
+              <mat-icon matPrefix>location_on</mat-icon>
+              <input matInput placeholder="Enter a location">
+              <mat-icon matSuffix>location_searching</mat-icon>
+            </mat-form-field>
+            <mat-form-field appearance="fill" class="form-field">
+              <mat-label>Speciality</mat-label>
+              <mat-icon matPrefix>ecg_heart</mat-icon>
+              <input matInput placeholder="Any speciality">
+            </mat-form-field>
+            <mat-form-field appearance="fill" class="form-field">
+              <mat-label>Doctor</mat-label>
+              <mat-icon matPrefix>clinical_notes</mat-icon>
+              <input matInput placeholder="Enter a name">
+            </mat-form-field>
+          </form>
+        </mat-card-content>
+        <mat-card-actions align="end">
+          <button mat-fab extended class="search-button">
+            <mat-icon>search</mat-icon>
+              Near me
+          </button>
+        </mat-card-actions>
+      </mat-card>
+    </mat-grid-tile>
+    <mat-grid-tile>
+      <mat-card appearance="outlined" class="landing-card">
+        <mat-card-header>
+          <mat-card-title-group>
+            <mat-card-title>{{ carouselItem.title }}</mat-card-title>
+            <img mat-card-lg-image [src]="carouselItem.imgage" [alt]="carouselItem.alt" >
+          </mat-card-title-group>
+          <mat-card-content>
+            {{ carouselItem.description }}
+          </mat-card-content>
+        </mat-card-header>
+      </mat-card>
+    </mat-grid-tile>
+  </mat-grid-list>
+</div>
