@@ -1,57 +1,97 @@
+/* eslint-disable no-prototype-builtins */
+/* eslint-disable no-restricted-syntax */
+/* eslint-disable no-param-reassign */
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { readdirSync, readFileSync } from 'fs';
 import { resolve } from 'path';
-
-import { SwaggerOptions, SwaggerUiOptions } from 'swagger-ui-express';
+import { SwaggerOptions } from 'swagger-ui-express';
 import { routesPath } from '../server/apiPaths';
 import { swaggerLogger as log } from '../server/winstonLog';
 
-const createSwaggerImport = (): SwaggerOptions => {
+interface CustomSwaggerOptions extends SwaggerOptions {
+  [key: string]: any; // Allows arbitrary properties
+}
+
+const createSwaggerImport = (): { [key: string]: SwaggerOptions } => {
   try {
-    return readdirSync(routesPath).map((folder: string) => {
-      const swaggerfile = readdirSync(resolve(routesPath, folder)).filter(
+    const swaggerFiles: { [key: string]: SwaggerOptions } = {};
+    const routeFolders = readdirSync(routesPath);
+
+    routeFolders.forEach((folder: string) => {
+      const swaggerFile = readdirSync(resolve(routesPath, folder)).find(
         (file: string) => file.includes('swagger')
-      )[0];
-      return JSON.parse(
-        readFileSync(resolve(routesPath, folder, swaggerfile), 'utf8')
       );
+      if (swaggerFile) {
+        try {
+          const fileContent = readFileSync(
+            resolve(routesPath, folder, swaggerFile),
+            'utf8'
+          );
+          const swaggerJSON = JSON.parse(fileContent);
+          const name = folder;
+          swaggerFiles[name] = swaggerJSON;
+        } catch (parseError) {
+          log.error(
+            `Error parsing Swagger file ${swaggerFile} in folder ${folder}: ${parseError}`
+          );
+        }
+      }
     });
+    return swaggerFiles;
   } catch (error) {
     log.error(`Error in createSwaggerImport: ${error}`);
-    return [];
+    return {};
   }
 };
 
-const addToSwaggerConfig = (config: SwaggerOptions): SwaggerUiOptions => {
+const addToSwaggerConfig = (
+  config: CustomSwaggerOptions
+): CustomSwaggerOptions => {
   try {
-    const swaggerJson = createSwaggerImport();
-    swaggerJson.forEach((eleIn: unknown) => {
-      const eleInTyped = eleIn as { [key: string]: unknown };
-      Object.entries(eleInTyped).forEach((inEntries) => {
-        const entrykey1 =
-          inEntries[0] !== null || inEntries[0] !== undefined
-            ? inEntries[0]
-            : '';
-        if (entrykey1 === 'paths') {
-          const keyConf1 = entrykey1 as keyof typeof config;
-          const keyInc1 = entrykey1 as keyof typeof eleIn;
-          Object.assign(config[keyConf1], eleInTyped[keyInc1]);
+    const swaggerJsons = createSwaggerImport();
+
+    config.paths = config.paths || {};
+    config.tags = config.tags || [];
+
+    for (const [name, swaggerJson] of Object.entries(swaggerJsons)) {
+      // Create a tag for the dropdown
+      const tag = {
+        name,
+        description: `API endpoints for ${name}`,
+      };
+      config.tags.push(tag);
+
+      // Merge paths and assign the tag to each path
+      if (swaggerJson.paths) {
+        for (const path in swaggerJson.paths) {
+          if (swaggerJson.paths.hasOwnProperty(path)) {
+            const pathItemObject = swaggerJson.paths[path];
+            for (const method in pathItemObject) {
+              if (pathItemObject.hasOwnProperty(method)) {
+                // Assign the tag to the operation
+                pathItemObject[method].tags = [tag.name];
+              }
+            }
+            config.paths[path] = {
+              ...config.paths[path],
+              ...pathItemObject,
+            };
+          }
         }
-        if (entrykey1 === 'components') {
-          const schemas = inEntries[1] as keyof typeof entrykey1;
-          Object.entries(schemas).forEach((ele) => {
-            const entrykey2 =
-              ele[0] !== null || ele[0] !== undefined ? ele[0] : '';
-            const keyConf2 = entrykey2 as keyof typeof config;
-            Object.assign(config[entrykey1][keyConf2], ele[1]);
-          });
-        }
-      });
-    });
-    console.log(config);
+      }
+      if (swaggerJson.components?.schemas) {
+        config.components = config.components || {};
+        config.components.schemas = config.components.schemas || {};
+        Object.assign(
+          config.components.schemas,
+          swaggerJson.components.schemas
+        );
+      }
+    }
     return config;
   } catch (error) {
     log.error(`Error in addToSwaggerConfig: ${error}`);
-    return {};
+    return config;
   }
 };
 
