@@ -38,8 +38,10 @@
 				"Angular.ng-template"
 			]
 		}
-	}
+	},
 
 	// Uncomment to connect as root instead. More info: https://aka.ms/dev-containers-non-root.
 	// "remoteUser": "vscode"
+	// Run 'docker compose down' when the container is shut down
+  "shutdownAction": "stopCompose"
 }
